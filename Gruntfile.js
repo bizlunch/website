@@ -309,9 +309,9 @@ module.exports = function (grunt) {
     },
 	
 	cdnify: {
-		dist: {
+		main: {
 		  options: {
-			base: 'http://az668376.vo.msecnd.net/'
+			base: 'http://d3p9xxyusm0ccp.cloudfront.net/'
 		  },
 		  files: [{
 			expand: true,
@@ -321,18 +321,42 @@ module.exports = function (grunt) {
 		  }]
 		}
 	  },
-	
-	'ftp-deploy': {
-		dist: {
-		  auth: {
-			host: 'ftp://waws-prod-am2-015.ftp.azurewebsites.windows.net',
-			port: 21,
-			authKey: 'azure_website'
-		  },
-		  src: '<%= config.dist %>',
-		  dest: '/site/wwwroot'
-		}
-	  }
+
+    compress: {
+      main: {
+        options: {
+          mode: 'gzip'
+        },
+        expand: true,
+        cwd: 'dist/',
+        src: ['**/*'],
+        dest: 'dist_gzip/'
+      }
+    },
+
+    aws: grunt.file.readJSON('aws-keys.json'),
+
+    aws_s3: {
+      options: {
+        accessKeyId: '<%= aws.AWSAccessKeyId %>', // Use the variables
+        secretAccessKey: '<%= aws.AWSSecretKey %>', // You can also use env variables
+        region: 'eu-central-1',
+        progress: 'progressBar',
+        uploadConcurrency: 5, // 5 simultaneous uploads
+        downloadConcurrency: 5 // 5 simultaneous downloads
+      },
+      production: {
+        options: {
+          bucket: 'bizlunch-website',
+          params: {
+            ContentEncoding: 'gzip' // applies to all the files!
+          }
+        },
+        files: [
+          {expand: true, cwd: 'dist_gzip/', src: ['**'], dest: '/'}
+        ]
+      }
+    }
   });
 
 
@@ -358,20 +382,11 @@ module.exports = function (grunt) {
     grunt.task.run([target ? ('serve:' + target) : 'serve']);
   });
 
-  grunt.registerTask('test', function (target) {
-    if (target !== 'watch') {
-      grunt.task.run([
-        'clean:server',
-        'concurrent:test',
-        'autoprefixer'
-      ]);
-    }
-
-    grunt.task.run([
-      'connect:test',
-      'mocha'
-    ]);
-  });
+  grunt.registerTask('deploy', [
+      'build',
+      'compress',
+      'aws_s3:production'
+  ]);
 
   grunt.registerTask('build', [
     'clean:dist',
@@ -384,7 +399,8 @@ module.exports = function (grunt) {
     'copy:dist',
     'rev',
     'usemin',
-    'htmlmin'
+    'htmlmin',
+      'cdnify'
   ]);
 
   grunt.registerTask('default', [
