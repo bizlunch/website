@@ -235,32 +235,6 @@ module.exports = function (grunt) {
       }
     },
 
-    // By default, your `index.html`'s <!-- Usemin block --> will take care
-    // of minification. These next options are pre-configured if you do not
-    // wish to use the Usemin blocks.
-    // cssmin: {
-    //   dist: {
-    //     files: {
-    //       '<%= config.dist %>/styles/main.css': [
-    //         '.tmp/styles/{,*/}*.css',
-    //         '<%= config.app %>/styles/{,*/}*.css'
-    //       ]
-    //     }
-    //   }
-    // },
-    // uglify: {
-    //   dist: {
-    //     files: {
-    //       '<%= config.dist %>/scripts/scripts.js': [
-    //         '<%= config.dist %>/scripts/scripts.js'
-    //       ]
-    //     }
-    //   }
-    // },
-    // concat: {
-    //   dist: {}
-    // },
-
     // Copies remaining files to places other tasks can use
     copy: {
       dist: {
@@ -273,8 +247,7 @@ module.exports = function (grunt) {
             '*.{ico,png,txt,config}',
             'images/{,*/}*.webp',
             '{,*/}*.html',
-            'styles/fonts/{,*/}*.*',
-			'fonts/*.*'
+              'img/*.*'
           ]
         }, {
           expand: true,
@@ -307,20 +280,6 @@ module.exports = function (grunt) {
         'svgmin'
       ]
     },
-	
-	cdnify: {
-		main: {
-		  options: {
-			base: 'http://d3p9xxyusm0ccp.cloudfront.net/'
-		  },
-		  files: [{
-			expand: true,
-			cwd: 'dist',
-			src: 'index.html',
-			dest: 'dist'
-		  }]
-		}
-	  },
 
     compress: {
       main: {
@@ -347,7 +306,7 @@ module.exports = function (grunt) {
       },
       production: {
         options: {
-          bucket: 'bizlunch-website',
+          bucket: 'bizlunch.fr',
           params: {
             ContentEncoding: 'gzip' // applies to all the files!
           }
@@ -395,12 +354,10 @@ module.exports = function (grunt) {
     'autoprefixer',
     'concat',
     'cssmin',
-    'uglify',
     'copy:dist',
     'rev',
     'usemin',
-    'htmlmin',
-      'cdnify'
+    'htmlmin'
   ]);
 
   grunt.registerTask('default', [
